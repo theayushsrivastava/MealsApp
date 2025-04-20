@@ -5,22 +5,42 @@ import { useLayoutEffect } from "react";
 import MealDetails from "../components/MealDetails";
 import List from "../components/MealDetail/List";
 import IconButton from "../components/IconButton";
+import { FavoritesContext } from "../store/context/favorites-context";
+import { useContext } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { addFavorite, removeFavorite } from "../store/redux/favorites";
+
+
 
 function MealDetailScreen() {
     const routeParams = useRoute().params;
     const navigation = useNavigation();
+    const favoriteMealIds = useSelector( (state) => state.favoriteMeals.ids );
 
+    const dispatch = useDispatch();
 
+    const mealId = routeParams.mealId;
+    const mealIsFavorite = favoriteMealIds.includes(mealId);
+    
+    
     const meal = MEALS.find( (m) => m.id === routeParams.mealId );
+
     function headerButtonPressHandler(){
         console.log("Button pressed");
+        if(favoriteMealIds.includes(meal.id)){
+            dispatch( removeFavorite({id: mealId}) );
+        } else {
+            dispatch( addFavorite({id: mealId}) );
+        }
+        
+    
     }
 
     useLayoutEffect( () => {
         navigation.setOptions({
             title: "Meal Details",
             headerRight: () => {
-                return <IconButton icon={'star'} size={24} color={'white'} />
+                return <IconButton icon={mealIsFavorite ? 'star' : 'star-outline'} size={24} color={'white'} onPress={headerButtonPressHandler} />
             }
         });
     }, [navigation, headerButtonPressHandler] );
